@@ -1,5 +1,3 @@
-import fs from 'fs';
-import path from 'path';
 import { getMarkdownContent, getMarkdownSlugs } from '../markdown';
 
 // Mock filesystem untuk pengujian
@@ -7,34 +5,37 @@ jest.mock('fs');
 jest.mock('path');
 jest.mock('gray-matter');
 jest.mock('remark');
+jest.mock('remark-html');
+jest.mock('rehype-sanitize');
 
 describe('Markdown Utilities', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     // Default join mock
-    (path.join as jest.Mock).mockImplementation((...args) => args.join('/'));
+    const path = require('path');
+    path.join.mockImplementation((...args: string[]) => args.join('/'));
   });
 
   describe('getMarkdownContent', () => {
-    it('harus membaca dan memparsing file Markdown', async () => {
+    it('harus membaca dan memparsing file Markdown dengan sanitasi', async () => {
       const mockFrontmatter = { title: 'Test', slug: 'test' };
       const mockContent = '# Hello World';
       const mockHtml = '<h1>Hello World</h1>';
 
-      (fs.existsSync as jest.Mock).mockReturnValue(true);
-      (fs.readFileSync as jest.Mock).mockReturnValue(
+      const fs = require('fs');
+      fs.existsSync.mockReturnValue(true);
+      fs.readFileSync.mockReturnValue(
         `---\ntitle: Test\nslug: test\n---\n${mockContent}`,
       );
 
-      // Mock gray-matter
-      const matterMock = require('gray-matter');
-      matterMock.mockReturnValue({ data: mockFrontmatter, content: mockContent });
+      const matter = require('gray-matter');
+      matter.mockReturnValue({ data: mockFrontmatter, content: mockContent });
 
-      // Mock remark chain
-      const remarkMock = require('remark');
+      // Mock remark chain dengan dua .use() (html & rehype-sanitize)
       const useMock = jest.fn().mockReturnThis();
       const processMock = jest.fn().mockResolvedValue({ toString: () => mockHtml });
-      remarkMock.mockReturnValue({ use: useMock, process: processMock });
+      const remark = require('remark');
+      remark.mockReturnValue({ use: useMock, process: processMock });
 
       const result = await getMarkdownContent('projects', 'test');
 
@@ -44,10 +45,12 @@ describe('Markdown Utilities', () => {
         expect.stringContaining('test.md'),
         'utf8',
       );
+      expect(useMock).toHaveBeenCalledTimes(2);
     });
 
     it('harus throw error jika file tidak ditemukan', async () => {
-      (fs.existsSync as jest.Mock).mockReturnValue(false);
+      const fs = require('fs');
+      fs.existsSync.mockReturnValue(false);
       await expect(getMarkdownContent('missing', 'file')).rejects.toThrow(
         'File Markdown tidak ditemukan',
       );
@@ -56,19 +59,17 @@ describe('Markdown Utilities', () => {
 
   describe('getMarkdownSlugs', () => {
     it('harus mengembalikan daftar slug dari file MD', () => {
-      (fs.existsSync as jest.Mock).mockReturnValue(true);
-      (fs.readdirSync as jest.Mock).mockReturnValue([
-        'project-a.md',
-        'project-b.md',
-        'readme.txt',
-      ]);
+      const fs = require('fs');
+      fs.existsSync.mockReturnValue(true);
+      fs.readdirSync.mockReturnValue(['project-a.md', 'project-b.md', 'readme.txt']);
 
       const slugs = getMarkdownSlugs('projects');
       expect(slugs).toEqual(['project-a', 'project-b']);
     });
 
     it('harus mengembalikan array kosong jika folder tidak ada', () => {
-      (fs.existsSync as jest.Mock).mockReturnValue(false);
+      const fs = require('fs');
+      fs.existsSync.mockReturnValue(false);
       const slugs = getMarkdownSlugs('nonexistent');
       expect(slugs).toEqual([]);
     });

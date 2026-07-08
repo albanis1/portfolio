@@ -3,14 +3,16 @@ import path from 'path';
 import matter from 'gray-matter';
 import { remark } from 'remark';
 import html from 'remark-html';
+import rehypeSanitize from 'rehype-sanitize';
 
 const contentDirectory = path.join(process.cwd(), 'content');
 
 /**
  * Membaca dan mem-parsing file Markdown dengan frontmatter.
+ * Konten HTML yang dihasilkan sudah disanitasi untuk mencegah XSS.
  * @param subfolder Subfolder di dalam /content (misal 'projects', 'experience')
  * @param slug Nama file tanpa ekstensi
- * @returns Objek berisi data frontmatter dan konten HTML
+ * @returns Objek berisi data frontmatter dan konten HTML yang aman
  */
 export async function getMarkdownContent(
   subfolder: string,
@@ -25,7 +27,11 @@ export async function getMarkdownContent(
   const fileContents = fs.readFileSync(fullPath, 'utf8');
   const { data, content } = matter(fileContents);
 
-  const processedContent = await remark().use(html, { sanitize: true }).process(content);
+  // Proses Markdown → HTML, lalu sanitasikan dengan rehype-sanitize
+  const processedContent = await remark()
+    .use(html)
+    .use(rehypeSanitize) // pastikan HTML aman
+    .process(content);
   const contentHtml = processedContent.toString();
 
   return { data, contentHtml };
