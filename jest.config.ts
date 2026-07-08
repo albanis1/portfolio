@@ -1,7 +1,11 @@
-import type { Config } from 'jest';
+import type { Config } from 'jest'
+import nextJest from 'next/jest.js'
+
+const createJestConfig = nextJest({
+  dir: './',
+})
 
 const config: Config = {
-  preset: 'ts-jest',
   testEnvironment: 'jsdom',
   // Menggunakan setupFiles untuk menjalankan setup sebelum setiap test suite.
   // File setup mengimpor @testing-library/jest-dom agar custom matchers tersedia.
@@ -21,4 +25,4 @@ const config: Config = {
   setupFilesAfterSetup: ['<rootDir>/jest.setup.ts'],
 };
 
-export default config;
+export default createJestConfig(config)
