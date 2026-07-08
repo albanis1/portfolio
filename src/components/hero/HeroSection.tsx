@@ -1,10 +1,15 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { motion, useAnimation } from 'framer-motion';
-import { AboutData } from '@/lib/about';
+import { motion, useMotionValue } from 'framer-motion';
+import type { HeroCtaItem } from '@/lib/about';
 
-interface HeroProps extends AboutData {}
+interface HeroProps {
+  name: string;
+  title: string;
+  subtitle: string;
+  heroCta: HeroCtaItem[];
+}
 
 export default function HeroSection({ name, title, subtitle, heroCta }: HeroProps) {
   const [displayName, setDisplayName] = useState('');
@@ -12,16 +17,23 @@ export default function HeroSection({ name, title, subtitle, heroCta }: HeroProp
     subtitle: false,
     cta: false,
   });
-  const [parallaxOffset, setParallaxOffset] = useState({ x: 0, y: 0 });
 
-  const mouseHandler = useCallback((e: React.MouseEvent<HTMLElement>) => {
-    const { clientX, clientY, currentTarget } = e;
-    const { width, height } = currentTarget.getBoundingClientRect();
-    // Hitung persentase posisi mouse dari tengah layar
-    const x = (clientX / width - 0.5) * 20; // maksimal 10% shift
-    const y = (clientY / height - 0.5) * 20;
-    setParallaxOffset({ x, y });
-  }, []);
+  // Motion values untuk parallax langsung tanpa animasi
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
+
+  const handleMouseMove = useCallback(
+    (e: React.MouseEvent<HTMLElement>) => {
+      const { clientX, clientY, currentTarget } = e;
+      const { width, height } = currentTarget.getBoundingClientRect();
+      // Hitung offset dalam persentase dari tengah
+      const offsetX = (clientX / width - 0.5) * 20; // max ±10 pixel (sebenarnya satuan px, bisa disesuaikan)
+      const offsetY = (clientY / height - 0.5) * 20;
+      mouseX.set(offsetX);
+      mouseY.set(offsetY);
+    },
+    [mouseX, mouseY]
+  );
 
   // Typewriter effect
   useEffect(() => {
@@ -32,61 +44,61 @@ export default function HeroSection({ name, title, subtitle, heroCta }: HeroProp
         currentIndex++;
       } else {
         clearInterval(interval);
-        // Setelah nama selesai, tampilkan subtitle lalu tombol
         setShowElements((prev) => ({ ...prev, subtitle: true }));
         setTimeout(() => setShowElements((prev) => ({ ...prev, cta: true })), 800);
       }
-    }, 100); // kecepatan ketik
+    }, 100);
 
     return () => clearInterval(interval);
   }, [name]);
 
-  // Animasi kontrol
-  const subtitleControls = useAnimation();
-  const ctaControls = useAnimation();
+  // Handler tombol CTA berdasarkan action
+  const handleCtaClick = (action: HeroCtaItem['action']) => {
+    switch (action) {
+      case 'scroll-to-about':
+        document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' });
+        break;
+      case 'download-resume':
+        window.open('/resume.pdf', '_blank');
+        break;
+      case 'scroll-to-contact':
+        document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' });
+        break;
+    }
+  };
 
-  useEffect(() => {
-    if (showElements.subtitle) {
-      subtitleControls.start({ opacity: 1, y: 0, transition: { duration: 0.8 } });
-    }
-    if (showElements.cta) {
-      ctaControls.start({ opacity: 1, scale: 1, transition: { duration: 0.6, staggerChildren: 0.2 } });
-    }
-  }, [showElements, subtitleControls, ctaControls]);
+  // Mapping variant ke kelas Tailwind
+  const variantClasses = {
+    primary: 'bg-white/20 hover:bg-white/30 text-white',
+    secondary: 'bg-transparent hover:bg-white/10 text-white border border-white/30',
+    accent: 'bg-indigo-500/80 hover:bg-indigo-500 text-white',
+  };
 
   return (
     <section
+      role="banner"
       className="relative h-screen w-full overflow-hidden bg-gradient-to-b from-gray-950 to-gray-900 flex flex-col items-center justify-center text-white"
-      onMouseMove={mouseHandler}
+      onMouseMove={handleMouseMove}
     >
       {/* Aurora background layers */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <motion.div
           className="absolute -top-1/2 -left-1/2 w-[200%] h-[200%] bg-gradient-radial from-purple-500/20 via-transparent to-transparent rounded-full"
-          animate={{
-            rotate: 360,
-            x: parallaxOffset.x * 0.8,
-            y: parallaxOffset.y * 0.8,
-          }}
-          transition={{ rotate: { repeat: Infinity, duration: 30, ease: 'linear' }, x: { type: 'spring', stiffness: 50 }, y: { type: 'spring', stiffness: 50 } }}
+          style={{ x: mouseX, y: mouseY }}
+          animate={{ rotate: 360 }}
+          transition={{ rotate: { repeat: Infinity, duration: 30, ease: 'linear' } }}
         />
         <motion.div
           className="absolute -bottom-1/2 -right-1/2 w-[200%] h-[200%] bg-gradient-radial from-cyan-500/20 via-transparent to-transparent rounded-full"
-          animate={{
-            rotate: -360,
-            x: parallaxOffset.x * 0.5,
-            y: parallaxOffset.y * 0.5,
-          }}
-          transition={{ rotate: { repeat: Infinity, duration: 25, ease: 'linear' }, x: { type: 'spring', stiffness: 50 }, y: { type: 'spring', stiffness: 50 } }}
+          style={{ x: mouseX, y: mouseY }}
+          animate={{ rotate: -360 }}
+          transition={{ rotate: { repeat: Infinity, duration: 25, ease: 'linear' } }}
         />
         <motion.div
           className="absolute top-1/4 left-1/4 w-[150%] h-[150%] bg-gradient-radial from-emerald-500/15 via-transparent to-transparent rounded-full"
-          animate={{
-            rotate: 180,
-            x: parallaxOffset.x * 0.3,
-            y: parallaxOffset.y * 0.3,
-          }}
-          transition={{ rotate: { repeat: Infinity, duration: 40, ease: 'linear' }, x: { type: 'spring', stiffness: 50 }, y: { type: 'spring', stiffness: 50 } }}
+          style={{ x: mouseX, y: mouseY }}
+          animate={{ rotate: 180 }}
+          transition={{ rotate: { repeat: Infinity, duration: 40, ease: 'linear' } }}
         />
       </div>
 
@@ -102,7 +114,7 @@ export default function HeroSection({ name, title, subtitle, heroCta }: HeroProp
           <motion.span
             className="inline-block ml-1 w-1 h-10 md:h-16 bg-white align-middle"
             animate={{ opacity: [0, 1] }}
-            transition={{ repeat: Infinity, duration: 0.8, ease: "easeInOut" }}
+            transition={{ repeat: Infinity, duration: 0.8, ease: 'easeInOut' }}
           />
         </motion.h1>
         {showElements.subtitle && (
@@ -122,29 +134,16 @@ export default function HeroSection({ name, title, subtitle, heroCta }: HeroProp
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.6 }}
           >
-            {heroCta.map((cta, index) => (
+            {heroCta.map((cta) => (
               <motion.button
-                key={index}
-                className={`px-8 py-3 rounded-full font-semibold text-lg transition shadow-lg backdrop-blur-sm border border-white/20 ${
-                  index === 0
-                    ? 'bg-white/20 hover:bg-white/30 text-white'
-                    : index === 1
-                    ? 'bg-transparent hover:bg-white/10 text-white'
-                    : 'bg-indigo-500/80 hover:bg-indigo-500 text-white'
-                }`}
+                key={cta.action}
+                className={`px-8 py-3 rounded-full font-semibold text-lg transition shadow-lg backdrop-blur-sm ${variantClasses[cta.variant]}`}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                onClick={() => {
-                  if (index === 1) {
-                    // Download resume
-                    window.open('/resume.pdf', '_blank');
-                  } else if (index === 2) {
-                    // Navigasi ke kontak (scroll atau halaman)
-                    document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' });
-                  }
-                }}
+                onClick={() => handleCtaClick(cta.action)}
+                aria-label={cta.label}
               >
-                {cta}
+                {cta.label}
               </motion.button>
             ))}
           </motion.div>
@@ -152,33 +151,38 @@ export default function HeroSection({ name, title, subtitle, heroCta }: HeroProp
       </div>
 
       {/* Scroll indicator */}
-      <motion.div
-        className="absolute bottom-8 left-1/2 transform -translate-x-1/2 text-white/70"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 2, duration: 1 }}
-      >
-        <motion.svg
-          xmlns="http://www.w3.org/2000/svg"
-          className="h-8 w-8"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-          strokeWidth={2}
-          animate={{ y: [0, 10, 0] }}
-          transition={{ repeat: Infinity, duration: 1.5, ease: 'easeInOut' }}
-        >
-          <path strokeLinecap="round" strokeLinejoin="round" d="M19 13l-7 7-7-7" />
-        </motion.svg>
+      <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 text-white/70">
         <motion.div
-          className="mt-1 text-xs"
           initial={{ opacity: 0 }}
-          animate={{ opacity: [0.2, 1, 0.2] }}
-          transition={{ repeat: Infinity, duration: 2 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 2, duration: 1 }}
+          className="flex flex-col items-center"
         >
-          Scroll
+          <motion.svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-8 w-8"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth={2}
+            animate={{ y: [0, 10, 0] }}
+            transition={{ repeat: Infinity, duration: 1.5, ease: 'easeInOut' }}
+            aria-hidden="true"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" d="M19 13l-7 7-7-7" />
+          </motion.svg>
+          <span className="sr-only">Scroll down</span>
+          <motion.span
+            className="mt-1 text-xs"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: [0.2, 1, 0.2] }}
+            transition={{ repeat: Infinity, duration: 2 }}
+            aria-hidden="true"
+          >
+            Scroll
+          </motion.span>
         </motion.div>
-      </motion.div>
+      </div>
     </section>
   );
 }
