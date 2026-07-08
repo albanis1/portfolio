@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { render, screen, fireEvent } from '@testing-library/react'
 import { AboutSection } from '../AboutSection'
 import type { AboutData } from '@/lib/about'
 
@@ -51,21 +51,18 @@ describe('AboutSection', () => {
   it('kartu ringkasan dapat dibalik', () => {
     render(<AboutSection data={mockData} />)
 
-    // Kartu summary adalah kartu dengan flipEnabled=true
     const summaryCard = screen.getByLabelText('Kartu Ringkasan Profesional')
     expect(summaryCard).toBeInTheDocument()
 
-    // Sebelum flip, teks tujuan karir tidak terlihat (karena back hidden)
+    // Sebelum flip, teks tujuan karir tidak terlihat
     expect(screen.queryByText('Tujuan Karir')).not.toBeInTheDocument()
 
     // Klik kartu untuk flip
     fireEvent.click(summaryCard)
 
-    // Setelah flip, teks "Tujuan Karir" muncul dan konten depan tersembunyi
+    // Setelah flip, teks tujuan karir muncul
     expect(screen.getByText('Tujuan Karir')).toBeInTheDocument()
     expect(screen.getByText('Menjadi CTO.')).toBeInTheDocument()
-    // Ringkasan profesional masih ada di DOM? Bisa tidak terlihat karena backface hidden.
-    // Kita cukup verifikasi elemen back muncul.
   })
 
   it('menampilkan tautan sosial jika tersedia', () => {

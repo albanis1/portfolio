@@ -46,6 +46,12 @@ export function getAboutData(): AboutData {
     }
   }
 
+  // Validasi tipe data yearsOfExperience sebagai number
+  const years = Number(data.yearsOfExperience)
+  if (isNaN(years)) {
+    throw new Error('Field yearsOfExperience harus berupa angka')
+  }
+
   // Pastikan interests array string
   if (!Array.isArray(data.interests)) {
     throw new Error('Field "interests" harus berupa array string')
@@ -56,7 +62,7 @@ export function getAboutData(): AboutData {
     title: data.title,
     summary: data.summary,
     specialization: data.specialization,
-    yearsOfExperience: Number(data.yearsOfExperience),
+    yearsOfExperience: years,
     currentPosition: data.currentPosition,
     interests: data.interests,
     careerGoals: data.careerGoals,
