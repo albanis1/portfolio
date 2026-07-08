@@ -39,7 +39,7 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className="min-h-screen bg-white dark:bg-black text-gray-900 dark:text-gray-100 transition-colors duration-300">
+      <body className="min-h-screen">
         <ThemeProvider>
           <Navbar />
           <main className="pt-16">{children}</main>
