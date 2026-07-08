@@ -10,7 +10,6 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // Palet kustom untuk glassmorphism / neon accent
         primary: {
           50: '#eef2ff',
           100: '#e0e7ff',
@@ -25,7 +24,6 @@ const config: Config = {
           950: '#1e1b4b',
         },
         accent: {
-          // Neon accent
           neon: '#22d3ee',
           glow: '#c084fc',
         },
