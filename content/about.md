@@ -1,6 +1,17 @@
 ---
 name: "Alexander Albanis"
 title: "Senior Fullstack Engineer & Cloud Architect"
+subtitle: "Membangun sistem tangguh, satu deploy dalam satu waktu"
+heroCta:
+  - label: "Jelajahi Portofolio"
+    action: "scroll-to-about"
+    variant: "primary"
+  - label: "Unduh Resume"
+    action: "download-resume"
+    variant: "secondary"
+  - label: "Hubungi Saya"
+    action: "scroll-to-contact"
+    variant: "accent"
 summary: >
   Saya adalah insinyur perangkat lunak dengan has membangun sistem terdistribusi,
   arsitektur cloud-native, dan aplikasi web performa tinggi. 

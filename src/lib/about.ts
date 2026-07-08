@@ -2,9 +2,19 @@ import fs from 'fs'
 import path from 'path'
 import matter from 'gray-matter'
 
+export interface HeroCtaItem {
+  label: string
+  action: 'scroll-to-about' | 'download-resume' | 'scroll-to-contact'
+  variant: 'primary' | 'secondary' | 'accent'
+}
+
 export interface AboutData {
   name: string
   title: string
+  // Data untuk Hero section
+  subtitle: string
+  heroCta: HeroCtaItem[]
+  // Data untuk kartu "Tentang Saya"
   summary: string
   specialization: string
   yearsOfExperience: number
@@ -26,7 +36,7 @@ const contentDirectory = path.join(process.cwd(), 'content')
  */
 export function getAboutData(): AboutData {
   const filePath = path.join(contentDirectory, 'about.md')
-  
+
   if (!fs.existsSync(filePath)) {
     throw new Error(`File about.md tidak ditemukan di ${filePath}`)
   }
@@ -34,9 +44,9 @@ export function getAboutData(): AboutData {
   const fileContent = fs.readFileSync(filePath, 'utf-8')
   const { data } = matter(fileContent)
 
-  // Validasi minimal
+  // Validasi minimal field wajib
   const requiredFields: (keyof AboutData)[] = [
-    'name', 'title', 'summary', 'specialization',
+    'name', 'title', 'subtitle', 'summary', 'specialization',
     'yearsOfExperience', 'currentPosition', 'interests', 'careerGoals'
   ]
 
@@ -57,9 +67,35 @@ export function getAboutData(): AboutData {
     throw new Error('Field "interests" harus berupa array string')
   }
 
+  // Validasi & normalisasi heroCta
+  if (!Array.isArray(data.heroCta)) {
+    throw new Error('Field "heroCta" harus berupa array')
+  }
+
+  const validActions = ['scroll-to-about', 'download-resume', 'scroll-to-contact']
+  const validVariants = ['primary', 'secondary', 'accent']
+  const heroCta: HeroCtaItem[] = data.heroCta.map((item: any) => {
+    if (!item.label || !item.action || !item.variant) {
+      throw new Error('Invalid heroCta item: each must have label, action, variant')
+    }
+    if (!validActions.includes(item.action)) {
+      throw new Error(`Invalid action in heroCta: ${item.action}`)
+    }
+    if (!validVariants.includes(item.variant)) {
+      throw new Error(`Invalid variant in heroCta: ${item.variant}`)
+    }
+    return {
+      label: item.label,
+      action: item.action as HeroCtaItem['action'],
+      variant: item.variant as HeroCtaItem['variant'],
+    }
+  })
+
   return {
     name: data.name,
     title: data.title,
+    subtitle: data.subtitle,
+    heroCta,
     summary: data.summary,
     specialization: data.specialization,
     yearsOfExperience: years,

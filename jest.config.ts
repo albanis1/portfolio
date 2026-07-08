@@ -7,10 +7,22 @@ const createJestConfig = nextJest({
 
 const config: Config = {
   testEnvironment: 'jsdom',
-  setupFiles: ['<rootDir>/jest.setup.ts'],
+  // Menggunakan setupFiles untuk menjalankan setup sebelum setiap test suite.
+  // File setup mengimpor @testing-library/jest-dom agar custom matchers tersedia.
+  setupFiles: ['<rootDir>/__tests__/setup.ts'],
+  testMatch: ['**/__tests__/**/*.test.[jt]s?(x)'],
+  moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
   moduleNameMapper: {
-    '@/(.*)': '<rootDir>/src/$1',
+    '^@/(.*)$': '<rootDir>/src/$1',
+    '^@/components/(.*)$': '<rootDir>/src/components/$1',
+    '^@/lib/(.*)$': '<rootDir>/src/lib/$1',
   },
-}
+  transform: {
+    '^.+\\.tsx?$': ['ts-jest', {
+      tsconfig: 'tsconfig.json',
+    }],
+  },
+  setupFilesAfterSetup: ['<rootDir>/jest.setup.ts'],
+};
 
 export default createJestConfig(config)
