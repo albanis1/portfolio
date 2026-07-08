@@ -1,0 +1,27 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 255 255 255;
+    --foreground: 0 0 0;
+    --card-bg: 255 255 255 / 0.7;
+    --border: 229 231 235;
+    --accent: 0 255 255;
+  }
+
+  .dark {
+    --background: 0 0 0;
+    --foreground: 255 255 255;
+    --card-bg: 0 0 0 / 0.7;
+    --border: 31 41 55;
+    --accent: 0 255 255;
+  }
+
+  body {
+    @apply bg-white dark:bg-black text-gray-900 dark:text-gray-100;
+    transition-property: background-color, color;
+    transition-duration: 300ms;
+  }
+}
