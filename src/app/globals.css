@@ -1,0 +1,57 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 255 255 255; /* light background */
+    --foreground: 15 23 42;
+
+    --color-primary: 99 102 241; /* indigo-500 */
+    --color-accent-neon: 6 182 212; /* cyan-500 */
+    --color-accent-glow: 192 132 252; /* violet-400 */
+  }
+
+  .dark {
+    --background: 15 23 42; /* slate-900 */
+    --foreground: 226 232 240;
+
+    --color-primary: 129 140 248; /* indigo-400 */
+    --color-accent-neon: 34 211 238; /* cyan-400 */
+    --color-accent-glow: 192 132 252; /* violet-400 */
+  }
+
+  * {
+    @apply border-gray-200 dark:border-gray-800;
+  }
+  body {
+    @apply bg-white dark:bg-slate-900 text-gray-900 dark:text-gray-200 min-h-screen;
+    font-feature-settings: 'rlig' 1, 'calt' 1;
+  }
+}
+
+@layer components {
+  /* Glassmorphism utility */
+  .glass {
+    @apply bg-white/10 dark:bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl shadow-glass;
+  }
+}
+
+@layer utilities {
+  .animate-aurora {
+    background: var(--aurora-gradient);
+    background-size: 400% 400%;
+    animation: aurora 15s ease infinite;
+  }
+  @keyframes aurora {
+    0% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+    100% {
+      background-position: 0% 50%;
+    }
+  }
+}
