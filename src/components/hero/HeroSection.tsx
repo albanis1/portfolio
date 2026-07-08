@@ -18,7 +18,7 @@ export default function HeroSection({ name, title, subtitle, heroCta }: HeroProp
     cta: false,
   });
 
-  // Motion values untuk parallax langsung tanpa animasi
+  // Motion values untuk parallax — tidak memicu re-render React
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
 
@@ -26,13 +26,13 @@ export default function HeroSection({ name, title, subtitle, heroCta }: HeroProp
     (e: React.MouseEvent<HTMLElement>) => {
       const { clientX, clientY, currentTarget } = e;
       const { width, height } = currentTarget.getBoundingClientRect();
-      // Hitung offset dalam persentase dari tengah
-      const offsetX = (clientX / width - 0.5) * 20; // max ±10 pixel (sebenarnya satuan px, bisa disesuaikan)
+      // Hitung offset dalam piksel dari tengah (maks ±20px)
+      const offsetX = (clientX / width - 0.5) * 20;
       const offsetY = (clientY / height - 0.5) * 20;
       mouseX.set(offsetX);
       mouseY.set(offsetY);
     },
-    [mouseX, mouseY]
+    [mouseX, mouseY],
   );
 
   // Typewriter effect
@@ -68,10 +68,17 @@ export default function HeroSection({ name, title, subtitle, heroCta }: HeroProp
   };
 
   // Mapping variant ke kelas Tailwind
-  const variantClasses = {
+  const variantClasses: Record<HeroCtaItem['variant'], string> = {
     primary: 'bg-white/20 hover:bg-white/30 text-white',
     secondary: 'bg-transparent hover:bg-white/10 text-white border border-white/30',
     accent: 'bg-indigo-500/80 hover:bg-indigo-500 text-white',
+  };
+
+  // Label aksesibel untuk setiap action
+  const ariaLabels: Record<HeroCtaItem['action'], string> = {
+    'scroll-to-about': 'Scroll to About section',
+    'download-resume': 'Download resume in new tab',
+    'scroll-to-contact': 'Scroll to contact form',
   };
 
   return (
@@ -82,18 +89,21 @@ export default function HeroSection({ name, title, subtitle, heroCta }: HeroProp
     >
       {/* Aurora background layers */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        {/* Layer 1: Purple aurora */}
         <motion.div
           className="absolute -top-1/2 -left-1/2 w-[200%] h-[200%] bg-gradient-radial from-purple-500/20 via-transparent to-transparent rounded-full"
           style={{ x: mouseX, y: mouseY }}
           animate={{ rotate: 360 }}
           transition={{ rotate: { repeat: Infinity, duration: 30, ease: 'linear' } }}
         />
+        {/* Layer 2: Cyan aurora */}
         <motion.div
           className="absolute -bottom-1/2 -right-1/2 w-[200%] h-[200%] bg-gradient-radial from-cyan-500/20 via-transparent to-transparent rounded-full"
           style={{ x: mouseX, y: mouseY }}
           animate={{ rotate: -360 }}
           transition={{ rotate: { repeat: Infinity, duration: 25, ease: 'linear' } }}
         />
+        {/* Layer 3: Emerald aurora */}
         <motion.div
           className="absolute top-1/4 left-1/4 w-[150%] h-[150%] bg-gradient-radial from-emerald-500/15 via-transparent to-transparent rounded-full"
           style={{ x: mouseX, y: mouseY }}
@@ -115,6 +125,7 @@ export default function HeroSection({ name, title, subtitle, heroCta }: HeroProp
             className="inline-block ml-1 w-1 h-10 md:h-16 bg-white align-middle"
             animate={{ opacity: [0, 1] }}
             transition={{ repeat: Infinity, duration: 0.8, ease: 'easeInOut' }}
+            aria-hidden="true"
           />
         </motion.h1>
         {showElements.subtitle && (
@@ -141,7 +152,7 @@ export default function HeroSection({ name, title, subtitle, heroCta }: HeroProp
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => handleCtaClick(cta.action)}
-                aria-label={cta.label}
+                aria-label={ariaLabels[cta.action]}
               >
                 {cta.label}
               </motion.button>

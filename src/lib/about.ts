@@ -18,7 +18,7 @@ export interface AboutData {
 const contentDirectory = path.join(process.cwd(), 'content');
 
 /**
- * Membaca dan mem−parsing data dari content/about.md.
+ * Membaca dan mem‑parsing data dari content/about.md.
  * Jika terjadi kesalahan (file tidak ditemukan, frontmatter salah),
  * akan mengembalikan data default agar halaman tidak crash.
  */
@@ -64,8 +64,8 @@ export function getAboutData(): AboutData {
       }
       return {
         label: item.label,
-        action: item.action,
-        variant: item.variant,
+        action: item.action as HeroCtaItem['action'],
+        variant: item.variant as HeroCtaItem['variant'],
       };
     });
 

@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'Alex Chen - Developer Portfolio',
+  title: 'Alex Chen — Developer Portfolio',
   description: 'Interactive portfolio showcasing engineering expertise.',
 };
 

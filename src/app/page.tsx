@@ -6,7 +6,7 @@ export default function HomePage() {
   try {
     aboutData = getAboutData();
   } catch (error) {
-    // Jika terjadi error fatal (tidak seharusnya karena getAboutData sudah fallback)
+    // Fallback jika terjadi error fatal (tidak seharusnya karena getAboutData sudah fallback)
     aboutData = {
       name: 'Alex Chen',
       title: 'Senior Full-Stack & Platform Engineer',
@@ -22,7 +22,7 @@ export default function HomePage() {
   return (
     <main>
       <HeroSection {...aboutData} />
-      {/* Placeholder section tujuan tombol Explore */}
+      {/* Placeholder: section About akan menggantikan div ini nantinya */}
       <div id="about" className="h-1" />
       {/* Section lainnya akan ditambahkan di sini */}
     </main>
