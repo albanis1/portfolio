@@ -23,7 +23,9 @@ describe('SkillsGalaxy', () => {
     // Setiap planet dirender sebagai tombol dengan aria-label
     mockSkills.forEach((skill) => {
       expect(
-        screen.getByRole('button', { name: `${skill.name} - Level ${skill.level}, ${skill.years} tahun pengalaman` })
+        screen.getByRole('button', {
+          name: `${skill.name} - Level ${skill.level}, ${skill.years} tahun pengalaman`,
+        }),
       ).toBeInTheDocument();
     });
   });

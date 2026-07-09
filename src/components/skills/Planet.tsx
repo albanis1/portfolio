@@ -1,16 +1,16 @@
 'use client';
 
 import React, { memo } from 'react';
-import { motion } from 'framer-motion';
+import { motion, type MotionValue } from 'framer-motion';
 
 interface PlanetProps {
   name: string;
   level: number;
   years: number;
-  radius: number;
-  angleMotion: any; // Framer MotionValue<number>
-  size?: number;
-  onHoverStart: () => void;
+  size: number;
+  x: MotionValue<number>;
+  y: MotionValue<number>;
+  onHoverStart: (e: React.MouseEvent) => void;
   onHoverEnd: () => void;
   onClick: () => void;
 }
@@ -27,30 +27,26 @@ const Planet = memo(function Planet({
   name,
   level,
   years,
-  radius,
-  angleMotion,
-  size = 40,
+  size,
+  x,
+  y,
   onHoverStart,
   onHoverEnd,
   onClick,
 }: PlanetProps) {
-  // Hitung koordinat dari sudut
-  const x = `calc(50% + ${radius}px * cos(${angleMotion}rad))`;
-  const y = `calc(50% + ${radius}px * sin(${angleMotion}rad))`;
-
   return (
     <motion.button
       className="absolute flex flex-col items-center justify-center focus:outline-none"
       style={{
         width: size,
         height: size,
-        // Posisi dihitung manual dengan transform
         left: `calc(50% - ${size / 2}px)`,
         top: `calc(50% - ${size / 2}px)`,
-        transform: `translate(${radius * Math.cos(angleMotion.get())}px, ${radius * Math.sin(angleMotion.get())}px)`,
+        x,
+        y,
       }}
       whileHover={{ scale: 1.3 }}
-      onHoverStart={onHoverStart}
+      onHoverStart={(e: any) => onHoverStart(e as React.MouseEvent)}
       onHoverEnd={onHoverEnd}
       onClick={onClick}
       aria-label={`${name} - Level ${level}, ${years} tahun pengalaman`}

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useCallback, useRef, useMemo } from 'react';
-import { motion, useAnimationFrame, useMotionValue } from 'framer-motion';
+import { useAnimationFrame, useMotionValue, useTransform, type MotionValue } from 'framer-motion';
 import Planet from './Planet';
 import SkillTooltip from './SkillTooltip';
 import SkillModal from './SkillModal';
@@ -26,7 +26,7 @@ export default function SkillsGalaxy({ skills }: SkillsGalaxyProps) {
 
   // Distribusi skill ke orbit berdasarkan index
   const orbitSkills = useMemo(() => {
-    const orbits: { config: typeof ORBIT_CONFIG[number]; skill: Skill }[] = [];
+    const orbits: { config: (typeof ORBIT_CONFIG)[number]; skill: Skill }[] = [];
     skills.forEach((skill, idx) => {
       const config = ORBIT_CONFIG[idx % ORBIT_CONFIG.length];
       orbits.push({ config, skill });
@@ -34,10 +34,9 @@ export default function SkillsGalaxy({ skills }: SkillsGalaxyProps) {
     return orbits;
   }, [skills]);
 
-  // Motion values untuk sudut (shared, jadi satu sumbu waktu untuk semua)
+  // Motion value untuk sudut global (satu sumbu waktu)
   const angle = useMotionValue(0);
-  useAnimationFrame((t, delta) => {
-    // delta dalam ms, kita update sudut konstan per detik
+  useAnimationFrame((_, delta) => {
     angle.set(angle.get() + 0.0005 * delta);
   });
 
@@ -110,16 +109,15 @@ export default function SkillsGalaxy({ skills }: SkillsGalaxyProps) {
       />
 
       {/* Modal detail */}
-      <SkillModal
-        skill={selectedSkill}
-        onClose={() => setSelectedSkill(null)}
-      />
+      <SkillModal skill={selectedSkill} onClose={() => setSelectedSkill(null)} />
     </div>
   );
 }
 
-// Komponen pembungkus untuk satu planet```typescript
-// Komponen pembungkus untuk satu planet agar animasi per planet terisolasi
+/**
+ * Komponen pembungkus untuk satu planet.
+ * Menghitung posisi x dan y secara reaktif dari angle menggunakan useTransform.
+ */
 function OrbitingPlanet({
   skill,
   orbitRadius,
@@ -132,27 +130,29 @@ function OrbitingPlanet({
   skill: Skill;
   orbitRadius: number;
   orbitSpeed: number;
-  angle: any;
+  angle: MotionValue<number>;
   onHoverStart: (e: React.MouseEvent) => void;
   onHoverEnd: () => void;
   onClick: () => void;
 }) {
-  const localAngle = useMotionValue(angle.get());
-  // offset sudut awal acak agar planet tersebar
+  // Offset sudut awal acak agar planet tersebar
   const initialOffset = useRef(Math.random() * Math.PI * 2).current;
 
-  useAnimationFrame((_, delta) => {
-    localAngle.set(angle.get() * orbitSpeed + initialOffset);
-  });
+  // Sudut lokal = sudut global * kecepatan orbit + offset
+  const localAngle = useTransform(angle, (a) => a * orbitSpeed + initialOffset);
+
+  // Posisi x dan y reaktif
+  const x = useTransform(localAngle, (a) => orbitRadius * Math.cos(a));
+  const y = useTransform(localAngle, (a) => orbitRadius * Math.sin(a));
 
   return (
     <Planet
       name={skill.name}
       level={skill.level}
       years={skill.years}
-      radius={orbitRadius}
-      angleMotion={localAngle}
-      size={skill.level * 6 + 28} // Ukuran planet berdasarkan level (28 - 58 px)
+      size={skill.level * 6 + 28}
+      x={x}
+      y={y}
       onHoverStart={onHoverStart}
       onHoverEnd={onHoverEnd}
       onClick={onClick}
