@@ -2,55 +2,65 @@
 skills:
   - name: React
     level: 5
-    years: 5
-    projects: 15
-    description: "Membangun antarmuka web modern dengan React dan ekosistemnya (Redux, React Router)."
+    years: 6
+    projects: 25
+    description: "Membangun antarmuka yang kompleks, state management (Redux, Zustand), Next.js, dan React Native."
+    category: frontend
   - name: TypeScript
     level: 5
-    years: 4
+    years: 5
     projects: 20
-    description: "Menulis kode yang aman dengan tipe ketat pada proyek skala enterprise."
+    description: "Strict typing, generics, utility types, integrasi seluruh proyek."
+    category: language
   - name: Node.js
+    level: 4
+    years: 5
+    projects: 15
+    description: "REST API, Express, NestJS, realtime (Socket.io), integrasi mikroservis."
+    category: backend
+  - name: Docker
     level: 4
     years: 4
     projects: 12
-    description: "Mengembangkan REST API dan layanan backend dengan Express dan NestJS."
+    description: "Containerization, Docker Compose, multi-stage builds."
+    category: devops
+  - name: Kubernetes
+    level: 3
+    years: 3
+    projects: 8
+    description: "Orchestration, Helm, ingress controller, monitoring."
+    category: devops
+  - name: PostgreSQL
+    level: 4
+    years: 5
+    projects: 18
+    description: "Desain skema, optimasi query, indexing, migrasi."
+    category: database
+  - name: AWS
+    level: 3
+    years: 3
+    projects: 10
+    description: "EC2, S3, Lambda, RDS, VPC, IAM."
+    category: cloud
+  - name: Redis
+    level: 3
+    years: 3
+    projects: 7
+    description: "Caching, message broker, session store."
+    category: backend
   - name: Go
     level: 3
     years: 2
     projects: 5
-    description: "Membangun microservice performa tinggi dengan Go dan gRPC."
-  - name: Docker
-    level: 4
-    years: 3
-    projects: 18
-    description: "Kontainerisasi aplikasi, Docker Compose untuk lingkungan development."
-  - name: Kubernetes
-    level: 3
-    years: 2
-    projects: 6
-    description: "Orkestrasi container di production dengan Helm dan monitoring."
-  - name: PostgreSQL
-    level: 4
-    years: 5
-    projects: 16
-    description: "Perancangan skema, optimasi query, dan replikasi."
-  - name: Redis
-    level: 3
-    years: 3
-    projects: 10
-    description: "Caching, session store, dan pub/sub untuk arsitektur event-driven."
-  - name: AWS
-    level: 3
-    years: 3
-    projects: 14
-    description: "Layanan cloud: EC2, S3, Lambda, RDS, dan CloudFront."
+    description: "CLI tool, backend service, performant."
+    category: language
   - name: CI/CD
     level: 4
     years: 4
-    projects: 22
-    description: "GitHub Actions, GitLab CI, Jenkins; automasi build, test, deploy."
+    projects: 12
+    description: "GitHub Actions, GitLab CI, Jenkins, pipeline."
+    category: devops
 ---
 
-# Skills
-Informasi di atas hanya frontmatter, konten tidak digunakan untuk saat ini.
+# Skills Detail
+Semua skill di atas dikelola secara dinamis.

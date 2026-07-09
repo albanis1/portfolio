@@ -1,72 +1,120 @@
-'use client';
-
-import React, { memo } from 'react';
-import { motion, type MotionValue } from 'framer-motion';
+import React, { useState, useCallback, useRef, useEffect } from 'react';
+import { motion } from 'framer-motion';
+import type { Skill } from '@/lib/skills';
 
 interface PlanetProps {
-  name: string;
-  level: number;
-  years: number;
-  size: number;
-  x: MotionValue<number>;
-  y: MotionValue<number>;
-  onHoverStart: (e: React.MouseEvent) => void;
-  onHoverEnd: () => void;
+  skill: Skill;
+  x: number;
+  y: number;
+  isCenter?: boolean;
   onClick: () => void;
+  onHover: (skill: Skill | null) => void;
 }
 
-const LEVEL_COLORS: Record<number, string> = {
-  1: '#f87171',
-  2: '#fbbf24',
-  3: '#34d399',
-  4: '#60a5fa',
-  5: '#c084fc',
-};
+/**
+ * Planet individual yang dirender di posisi (x, y).
+ * Di-memo untuk mencegah re-render saat orbit berubah (posisi dihitung di parent).
+ */
+const Planet: React.FC<PlanetProps> = React.memo(
+  ({ skill, x, y, isCenter = false, onClick, onHover }) => {
+    const [isHovered, setIsHovered] = useState(false);
+    const planetRef = useRef<HTMLDivElement>(null);
 
-const Planet = memo(function Planet({
-  name,
-  level,
-  years,
-  size,
-  x,
-  y,
-  onHoverStart,
-  onHoverEnd,
-  onClick,
-}: PlanetProps) {
-  return (
-    <motion.button
-      className="absolute flex flex-col items-center justify-center focus:outline-none"
-      style={{
-        width: size,
-        height: size,
-        left: `calc(50% - ${size / 2}px)`,
-        top: `calc(50% - ${size / 2}px)`,
-        x,
-        y,
-      }}
-      whileHover={{ scale: 1.3 }}
-      onHoverStart={(e: any) => onHoverStart(e as React.MouseEvent)}
-      onHoverEnd={onHoverEnd}
-      onClick={onClick}
-      aria-label={`${name} - Level ${level}, ${years} tahun pengalaman`}
-    >
-      {/* Bola planet */}
+    const handleMouseEnter = useCallback(() => {
+      setIsHovered(true);
+      onHover(skill);
+    }, [skill, onHover]);
+
+    const handleMouseLeave = useCallback(() => {
+      setIsHovered(false);
+      onHover(null);
+    }, [onHover]);
+
+    const handleFocus = useCallback(() => {
+      setIsHovered(true);
+      onHover(skill);
+    }, [skill, onHover]);
+
+    const handleBlur = useCallback(() => {
+      setIsHovered(false);
+      onHover(null);
+    }, [onHover]);
+
+    const handleKeyDown = (e: React.KeyboardEvent) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        onClick();
+      }
+    };
+
+    // Ukuran planet berdasarkan level (1-5) -> 40px - 80px
+    const size = isCenter ? 80 : 40 + skill.level * 8; // 40 + (level*8) => antara 48-80
+    const baseScale = isHovered ? 1.2 : 1;
+
+    // Level mewakili warna (lebih tinggi lebih terang/intens)
+    const colorMap = [
+      'bg-blue-500 dark:bg-blue-400',
+      'bg-green-500 dark:bg-green-400',
+      'bg-yellow-500 dark:bg-yellow-400',
+      'bg-purple-500 dark:bg-purple-400',
+      'bg-pink-500 dark:bg-pink-400',
+    ];
+    const color = isCenter ? 'bg-white dark:bg-gray-200' : colorMap[skill.level - 1];
+
+    return (
       <div
-        className="rounded-full shadow-lg"
+        className="absolute"
         style={{
-          width: size,
-          height: size,
-          background: `radial-gradient(circle at 30% 30%, ${LEVEL_COLORS[level] || '#aaa'}66, ${LEVEL_COLORS[level] || '#aaa'})`,
-          boxShadow: `0 0 20px ${LEVEL_COLORS[level] || '#aaa'}80`,
+          left: `${x}%`,
+          top: `${y}%`,
+          transform: `translate(-50%, -50%)`,
+          willChange: 'transform',
         }}
-      />
-      {/* Nama skill di bawah planet */}
-      <span className="text-xs mt-1 text-gray-200 dark:text-gray-300 text-center leading-tight">
-        {name}
-      </span>
-    </motion.button>
-  );
-});
+      >
+        <motion.div
+          ref={planetRef}
+          role="button"
+          tabIndex={0}
+          aria-label={`${skill.name}: level ${skill.level}, ${skill.years} years`}
+          className={`
+            rounded-full cursor-pointer flex items-center justify-center
+            shadow-lg hover:shadow-xl transition-shadow duration-300
+            focus:outline-none focus:ring-4 focus:ring-purple-300
+            ${color}
+          `}
+          style={{
+            width: size,
+            height: size,
+          }}
+          animate={{ scale: baseScale }}
+          whileTap={{ scale: 0.95 }}
+          onMouseEnter={handleMouseEnter}
+          onMouseLeave={handleMouseLeave}
+          onFocus={handleFocus}
+          onBlur={handleBlur}
+          onClick={onClick}
+          onKeyDown={handleKeyDown}
+        >
+          <span className="text-white dark:text-gray-900 font-bold text-xs md:text-sm leading-tight text-center px-1">
+            {skill.name}
+          </span>
+        </motion.div>
 
+        {/* Tooltip muncul saat hover/focus */}
+        {isHovered && (
+          <div
+            className="absolute z-20 left-1/2 -translate-x-1/2 bottom-full mb-2 w-48 bg-gray-900 text-white text-xs rounded-lg px-3 py-2 shadow-lg text-center pointer-events-none"
+            role="tooltip"
+          >
+            <strong>{skill.name}</strong>
+            <br />
+            Level: {skill.level}/5 · {skill.years} thn
+          </div>
+        )}
+      </div>
+    );
+  }
+);
+
+Planet.displayName = 'Planet';
 export default Planet;
